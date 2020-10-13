@@ -53,7 +53,7 @@ bool FIRCLSProcessInit(FIRCLSProcess *process, thread_t crashedThread, void *uap
 
     return false;
   }
-
+  
   return true;
 }
 
@@ -216,11 +216,20 @@ static bool FIRCLSProcessGetThreadState(FIRCLSProcess *process,
 #if !TARGET_OS_WATCH
   // try to get the value by querying the thread state
   mach_msg_type_number_t stateCount = FIRCLSThreadStateCount;
-  if (thread_get_state(thread, FIRCLSThreadState, (thread_state_t)(&(context->__ss)),
-                       &stateCount) != KERN_SUCCESS) {
-    FIRCLSSDKLogError("failed to get thread state\n");
-    return false;
-  }
+// if (FIRCLSHostIsRosettaTranslated()) {
+//    if (oah_get_x86_thread_state(thread, FIRCLSThreadState, (thread_state_t)(&(context->__ss)),
+//                         &stateCount) != KERN_SUCCESS) {
+//      FIRCLSSDKLogError("failed to get x86 thread state in Rosetta 2 process\n");
+//      return false;
+//    }
+    
+//  } else {
+    if (thread_get_state(thread, FIRCLSThreadState, (thread_state_t)(&(context->__ss)),
+                         &stateCount) != KERN_SUCCESS) {
+      FIRCLSSDKLogError("failed to get thread state\n");
+      return false;
+    }
+//  }
 
   return true;
 #else
