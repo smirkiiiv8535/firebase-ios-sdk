@@ -80,8 +80,6 @@ static NSTimeInterval const CLSReportRetryInterval = 10 * 60;
 
 static NSString *FIRCLSFirebaseAnalyticsEventLogFormat = @"$A$:%@";
 
-static BOOL crashAtLaunch = NO;
-
 @interface FIRCLSAnalyticsInteropListener : NSObject <FIRAnalyticsInteropListener> {
 }
 @end
