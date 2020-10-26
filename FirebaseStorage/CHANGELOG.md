@@ -1,6 +1,12 @@
 # 7.0.0
 - [changed] The global variable `FIRStorageVersionString` is deleted.
   `FirebaseVersion()` or `FIRFirebaseVersion()` should be used instead.
+- [fixed] Fixed an issue with the List API that prevented listing of locations
+  that contain the "+" sign.
+- [changed] Renamed `list(withMaxResults:)` to `list(maxResults:)` in the Swift
+  API.
+- [fixed] Fixed an issue that caused longer than expected timeouts for users
+  that specified custom timeouts.
 
 # 3.8.1
 - [fixed] Fixed typo in doc comments (#6485).

@@ -1,5 +1,6 @@
 # Unreleased
 - [changed] Improved SDK startup performance by moving binary image initialization to an asynchronous background thread.
+- [fixed] Fixed an issue where symbol uploads would fail when there are spaces in the project path, particularly in Unity builds (#6789).
 
 # v4.6.2
 
