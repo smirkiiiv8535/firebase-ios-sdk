@@ -1,3 +1,6 @@
+# Unreleased
+- [changed] Improved SDK startup performance by moving binary image initialization to an asynchronous background thread.
+
 # v4.6.2
 
 - [changed] Improved upload-symbols conversion speed. Customers with large dSYMs should see a significant improvement in the time it takes to upload Crashlytics symbols.
