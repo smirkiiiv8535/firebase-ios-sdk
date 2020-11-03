@@ -216,7 +216,9 @@ static bool FIRCLSProcessGetThreadState(FIRCLSProcess *process,
 #if !TARGET_OS_WATCH
   // try to get the value by querying the thread state
   mach_msg_type_number_t stateCount = FIRCLSThreadStateCount;
-  // For unknown reasons, thread_get_state returns this value on
+
+  // For unknown reasons, thread_get_state returns this value on Rosetta,
+  // but still succeeds.
   const int ROSETTA_SUCCESS = 268435459;
   kern_return_t status = thread_get_state(thread, FIRCLSThreadState, (thread_state_t)(&(context->__ss)),
                                    &stateCount);

@@ -71,6 +71,8 @@ vm_size_t FIRCLSHostGetPageSize(void) {
 
   int maxNativePageSize = CLS_MAX_NATIVE_PAGE_SIZE;
   
+  // On Apple Silicon, we need to use the arm64 page size
+  // even if we're in x86 land.
   if (FIRCLSHostIsRosettaTranslated()) {
     FIRCLSSDKLog("Running under Rosetta 2 emulation. Using the arm64 page size.\n");
 
