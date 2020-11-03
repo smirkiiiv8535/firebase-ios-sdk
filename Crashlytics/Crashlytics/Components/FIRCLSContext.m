@@ -14,7 +14,6 @@
 
 #include "Crashlytics/Crashlytics/Components/FIRCLSContext.h"
 
-#include <dlfcn.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -49,13 +48,6 @@ static const int64_t FIRCLSContextInitWaitTime = 5LL * NSEC_PER_SEC;
 static bool FIRCLSContextRecordMetadata(const char* path, const FIRCLSContextInitData* initData);
 static const char* FIRCLSContextAppendToRoot(NSString* root, NSString* component);
 static void FIRCLSContextAllocate(FIRCLSContext* context);
-
-//static void *FIRCLSLibOAHHandle = NULL;
-//kern_return_t (*oah_get_x86_thread_state)(thread_read_t target_act,
-//                                             thread_state_flavor_t flavor,
-//                                             thread_state_t old_state,
-//                                             mach_msg_type_number_t *old_stateCnt);
-
 
 FIRCLSContextInitData FIRCLSContextBuildInitData(FIRCLSInternalReport* report,
                                                  FIRCLSSettings* settings,
@@ -203,14 +195,7 @@ bool FIRCLSContextInitialize(FIRCLSInternalReport* report,
         FIRCLSContextAppendToRoot(rootPath, fileName);
   });
 
-// TODO Undo this
-// TODO Undo this
-// TODO Undo this
-// TODO Undo this
-// TODO Undo this
-// TODO Undo this
-// TODO Undo this
-//  if (!_firclsContext.readonly->debuggerAttached) {
+  if (!_firclsContext.readonly->debuggerAttached) {
 #if CLS_SIGNAL_SUPPORTED
     dispatch_group_async(group, queue, ^{
       _firclsContext.readonly->signal.path =
@@ -238,9 +223,9 @@ bool FIRCLSContextInitialize(FIRCLSInternalReport* report,
       FIRCLSExceptionInitialize(&_firclsContext.readonly->exception,
                                 &_firclsContext.writable->exception, initData->delegate);
     });
-//  } else {
-//    FIRCLSSDKLog("Debugger present - not installing handlers\n");
-//  }
+  } else {
+    FIRCLSSDKLog("Debugger present - not installing handlers\n");
+  }
 
   dispatch_group_async(group, queue, ^{
     const char* metaDataPath = [[rootPath stringByAppendingPathComponent:FIRCLSReportMetadataFile]
@@ -250,33 +235,6 @@ bool FIRCLSContextInitialize(FIRCLSInternalReport* report,
     }
   });
 
-  
-//  // Dynamically load the OAH library to get the Rosetta  2 thread state
-//  // functions
-//  FIRCLSLibOAHHandle = dlopen("/Users/samedson/Downloads/liboah.dylib", RTLD_LAZY);
-//  if (FIRCLSLibOAHHandle == NULL) {
-//    FIRCLSSDKLog("Error: %s", dlerror());
-//    FIRCLSSDKLog("Unable to instantiate handler %s\n", strerror(errno));
-//    FIRCLSSDKLog("Error: unable to load libOAH for Rosetta 2 thread processing\n");
-//
-//    // TODO do we want to return true
-//    // TODO do we want to return true
-//    // TODO do we want to return true
-//    // TODO do we want to return true?
-//    return true;
-//  }
-//
-//  oah_get_x86_thread_state = dlsym(FIRCLSLibOAHHandle, "oah_get_x86_thread_state");
-//  if (oah_get_x86_thread_state == NULL) {
-//    FIRCLSSDKLog("Error: unable to load oah_get_x86_thread_state function from libOAH handle for Rosetta 2 thread processing\n");
-//    // TODO do we want to return true
-//    // TODO do we want to return true
-//    // TODO do we want to return true
-//    // TODO do we want to return true?
-//    return true;
-//  }
-
-  
   // At this point we need to do two things. First, we need to do our memory protection *only* after
   // all of these initialization steps are really done. But, we also want to wait as long as
   // possible for these to be complete. If we do not, there's a chance that we will not be able to

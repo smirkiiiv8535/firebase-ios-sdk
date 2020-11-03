@@ -53,7 +53,7 @@ bool FIRCLSProcessInit(FIRCLSProcess *process, thread_t crashedThread, void *uap
 
     return false;
   }
-  
+
   return true;
 }
 
