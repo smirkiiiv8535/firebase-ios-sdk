@@ -216,20 +216,14 @@ static bool FIRCLSProcessGetThreadState(FIRCLSProcess *process,
 #if !TARGET_OS_WATCH
   // try to get the value by querying the thread state
   mach_msg_type_number_t stateCount = FIRCLSThreadStateCount;
-// if (FIRCLSHostIsRosettaTranslated()) {
-//    if (oah_get_x86_thread_state(thread, FIRCLSThreadState, (thread_state_t)(&(context->__ss)),
-//                         &stateCount) != KERN_SUCCESS) {
-//      FIRCLSSDKLogError("failed to get x86 thread state in Rosetta 2 process\n");
-//      return false;
-//    }
-    
-//  } else {
-    if (thread_get_state(thread, FIRCLSThreadState, (thread_state_t)(&(context->__ss)),
-                         &stateCount) != KERN_SUCCESS) {
-      FIRCLSSDKLogError("failed to get thread state\n");
-      return false;
-    }
-//  }
+  // For unknown reasons, thread_get_state returns this value on
+  const int ROSETTA_SUCCESS = 268435459;
+  kern_return_t status = thread_get_state(thread, FIRCLSThreadState, (thread_state_t)(&(context->__ss)),
+                                   &stateCount);
+  if (status != KERN_SUCCESS && status != ROSETTA_SUCCESS) {
+    FIRCLSSDKLogError("Failed to get thread state via thread_get_state for thread: %i\n", thread);
+    return false;
+  }
 
   return true;
 #else
@@ -555,6 +549,11 @@ void FIRCLSProcessRecordDispatchQueueNames(FIRCLSProcess *process, FIRCLSFile *f
 
     name = FIRCLSProcessGetThreadDispatchQueueName(process, thread);
 
+    // Apple Report Converter will fail to parse this when "name" is null,
+    // so we will use an empty string instead.
+    if (name == NULL) {
+      name = "";
+    }
     FIRCLSFileWriteArrayEntryString(file, name);
   }
 
