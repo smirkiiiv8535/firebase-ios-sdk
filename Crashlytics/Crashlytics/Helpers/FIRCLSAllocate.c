@@ -193,7 +193,7 @@ void* FIRCLSAllocatorSafeAllocate(FIRCLSAllocatorRef allocator,
                                   size_t size,
                                   FIRCLSAllocationType type) {
   FIRCLSAllocationRegion* region;
-  
+
   if (!allocator) {
     // fall back to malloc in this case
     FIRCLSSDKLog("Allocator invalid, falling back to malloc\n");
