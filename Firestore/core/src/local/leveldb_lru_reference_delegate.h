@@ -60,7 +60,7 @@ class LevelDbLruReferenceDelegate : public LruDelegate {
   util::StatusOr<int64_t> CalculateByteSize() override;
   size_t GetSequenceNumberCount() override;
 
-  void EnumerateTargets(const TargetCallback& callback) override;
+  void EnumerateTargetSequenceNumbers(const SequenceNumberCallback &callback) override;
   void EnumerateOrphanedDocuments(
       const OrphanedDocumentCallback& callback) override;
 

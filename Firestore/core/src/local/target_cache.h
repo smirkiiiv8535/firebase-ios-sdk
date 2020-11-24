@@ -37,7 +37,7 @@ class TargetData;
 using OrphanedDocumentCallback =
     std::function<void(const model::DocumentKey&, model::ListenSequenceNumber)>;
 
-using TargetCallback = std::function<void(const TargetData&)>;
+using SequenceNumberCallback = std::function<void(model::ListenSequenceNumber)>;
 
 /**
  * Represents cached targets received from the remote backend. This contains
@@ -87,7 +87,7 @@ class TargetCache {
    */
   virtual absl::optional<TargetData> GetTarget(const core::Target& target) = 0;
 
-  virtual void EnumerateTargets(const TargetCallback& callback) = 0;
+  virtual void EnumarateSequenceNumbers(const SequenceNumberCallback &callback) = 0;
 
   virtual int RemoveTargets(
       model::ListenSequenceNumber upper_bound,

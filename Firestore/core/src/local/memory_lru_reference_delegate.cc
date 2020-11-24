@@ -87,8 +87,8 @@ void MemoryLruReferenceDelegate::OnTransactionCommitted() {
 }
 
 void MemoryLruReferenceDelegate::EnumerateTargets(
-    const TargetCallback& callback) {
-  return persistence_->target_cache()->EnumerateTargets(callback);
+    const SequenceNumberCallback& callback) {
+  return persistence_->target_cache()->EnumarateSequenceNumbers(callback);
 }
 
 void MemoryLruReferenceDelegate::EnumerateOrphanedDocuments(
