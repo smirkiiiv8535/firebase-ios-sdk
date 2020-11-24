@@ -81,7 +81,8 @@ class LruDelegate : public ReferenceDelegate {
    * Enumerates all the targets that the delegate is aware of. This is typically
    * all of the targets in an TargetCache.
    */
-  virtual void EnumerateTargetSequenceNumbers(const SequenceNumberCallback& callback) = 0;
+  virtual void EnumerateTargetSequenceNumbers(
+      const SequenceNumberCallback& callback) = 0;
 
   /**
    * Enumerates all of the outstanding mutations.

@@ -68,9 +68,10 @@ absl::optional<TargetData> MemoryTargetCache::GetTarget(const Target& target) {
   return iter == targets_.end() ? absl::optional<TargetData>{} : iter->second;
 }
 
-void MemoryTargetCache::EnumarateSequenceNumbers(const SequenceNumberCallback &callback) {
+void MemoryTargetCache::EnumerateSequenceNumbers(
+    const SequenceNumberCallback& callback) {
   for (const auto& kv : targets_) {
-    callback(kv.second);
+    callback(kv.second.sequence_number());
   }
 }
 

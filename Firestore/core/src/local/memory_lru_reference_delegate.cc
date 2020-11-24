@@ -86,9 +86,9 @@ void MemoryLruReferenceDelegate::OnTransactionCommitted() {
   current_sequence_number_ = kListenSequenceNumberInvalid;
 }
 
-void MemoryLruReferenceDelegate::EnumerateTargets(
+void MemoryLruReferenceDelegate::EnumerateTargetSequenceNumbers(
     const SequenceNumberCallback& callback) {
-  return persistence_->target_cache()->EnumarateSequenceNumbers(callback);
+  return persistence_->target_cache()->EnumerateSequenceNumbers(callback);
 }
 
 void MemoryLruReferenceDelegate::EnumerateOrphanedDocuments(

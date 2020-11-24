@@ -120,8 +120,8 @@ size_t LevelDbLruReferenceDelegate::GetSequenceNumberCount() {
 }
 
 void LevelDbLruReferenceDelegate::EnumerateTargetSequenceNumbers(
-        const SequenceNumberCallback &callback) {
-    db_->target_cache()->EnumarateSequenceNumbers(callback);
+    const SequenceNumberCallback& callback) {
+  db_->target_cache()->EnumerateSequenceNumbers(callback);
 }
 
 void LevelDbLruReferenceDelegate::EnumerateOrphanedDocuments(

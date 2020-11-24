@@ -17,6 +17,7 @@
 #include "Firestore/core/src/local/leveldb_target_cache.h"
 
 #include <string>
+#include <unordered_set>
 #include <utility>
 
 #include "Firestore/core/src/local/leveldb_key.h"
@@ -124,7 +125,7 @@ void LevelDbTargetCache::UpdateTarget(const TargetData& target_data) {
 void LevelDbTargetCache::RemoveTarget(const TargetData& target_data) {
   TargetId target_id = target_data.target_id();
 
-    RemoveAllDocumentKeysForTarget(target_id);
+  RemoveAllDocumentKeysForTarget(target_id);
 
   std::string key = LevelDbTargetKey::Key(target_id);
   db_->current_transaction()->Delete(key);
@@ -188,15 +189,15 @@ absl::optional<TargetData> LevelDbTargetCache::GetTarget(const Target& target) {
   return absl::nullopt;
 }
 
-void LevelDbTargetCache::EnumarateSequenceNumbers(const SequenceNumberCallback &callback) {
+void LevelDbTargetCache::EnumerateSequenceNumbers(
+    const SequenceNumberCallback& callback) {
   // Enumerate all targets, give their sequence numbers.
   std::string target_prefix = LevelDbTargetKey::KeyPrefix();
   auto it = db_->current_transaction()->NewIterator();
   it->Seek(target_prefix);
   for (; it->Valid() && absl::StartsWith(it->key(), target_prefix);
        it->Next()) {
-
-      StringReader reader{it->value()};
+    StringReader reader{it->value()};
     auto target_proto = DecodeTargetProto(&reader);
     callback(target_proto->last_listen_sequence_number);
   }
@@ -205,35 +206,33 @@ void LevelDbTargetCache::EnumarateSequenceNumbers(const SequenceNumberCallback &
 int LevelDbTargetCache::RemoveTargets(
     ListenSequenceNumber upper_bound,
     const std::unordered_map<model::TargetId, TargetData>& live_targets) {
-  int count = 0;
   std::string target_prefix = LevelDbTargetKey::KeyPrefix();
   auto it = db_->current_transaction()->NewIterator();
   it->Seek(target_prefix);
 
-  std::set<model::TargetId> removed_targets;
+  std::unordered_set<model::TargetId> removed_targets;
 
   for (; it->Valid() && absl::StartsWith(it->key(), target_prefix);
        it->Next()) {
-      StringReader reader{it->value()};
+    StringReader reader{it->value()};
     auto target_proto = DecodeTargetProto(&reader);
-    if (target_proto.sequence_number() <= upper_bound &&
-        live_targets.find(target_proto.target_id()) == live_targets.end()) {
-        TargetId target_id = target_proto->target_id();
+    if (target_proto->last_listen_sequence_number <= upper_bound &&
+        live_targets.find(target_proto->target_id) == live_targets.end()) {
+      TargetId target_id = target_proto->target_id;
 
-        RemoveAllDocumentKeysForTarget(target_id);
+      RemoveAllDocumentKeysForTarget(target_id);
 
-        std::string key = LevelDbTargetKey::Key(target_id);
-        db_->current_transaction()->Delete(key);
+      std::string key = LevelDbTargetKey::Key(target_id);
+      db_->current_transaction()->Delete(key);
 
-        removed_targets.insert(target_id);
+      removed_targets.insert(target_id);
     }
   }
 
+  RemoveQueryTargetKeyForTargets(removed_targets);
+  metadata_->target_count -= removed_targets.size();
 
-    RemoveQueryTargetKeyForTargets(removed_targets);
-    metadata_->target_count -= removed_targets.size();
-
-    SaveMetadata();
+  SaveMetadata();
   return removed_targets.size();
 }
 
@@ -287,24 +286,24 @@ void LevelDbTargetCache::RemoveAllDocumentKeysForTarget(TargetId target_id) {
   }
 }
 
-    void LevelDbTargetCache::RemoveQueryTargetKeyForTargets(std::set<TargetId> target_ids) {
-        std::string index_prefix = LevelDbQueryTargetKey::KeyPrefix();
-        auto index_iterator = db_->current_transaction()->NewIterator();
-        index_iterator->Seek(index_prefix);
+void LevelDbTargetCache::RemoveQueryTargetKeyForTargets(
+    std::unordered_set<TargetId> target_ids) {
+  std::string index_prefix = LevelDbQueryTargetKey::KeyPrefix();
+  auto index_iterator = db_->current_transaction()->NewIterator();
+  index_iterator->Seek(index_prefix);
 
-        LevelDbQueryTargetKey row_key;
-        for (; index_iterator->Valid(); index_iterator->Next()) {
-            if (!row_key.Decode(index_iterator->key())) {
-                break;
-            }
-
-           if (target_ids.find(row_key.target_id()) != target_ids.end()) {
-
-               db_->current_transaction()->Delete(index_iterator->key());
-               break;
-}
-        }
+  LevelDbQueryTargetKey row_key;
+  for (; index_iterator->Valid(); index_iterator->Next()) {
+    if (!row_key.Decode(index_iterator->key())) {
+      break;
     }
+
+    if (target_ids.find(row_key.target_id()) != target_ids.end()) {
+      db_->current_transaction()->Delete(index_iterator->key());
+      break;
+    }
+  }
+}
 
 DocumentKeySet LevelDbTargetCache::GetMatchingKeys(TargetId target_id) {
   std::string index_prefix = LevelDbTargetDocumentKey::KeyPrefix(target_id);
@@ -423,15 +422,15 @@ void LevelDbTargetCache::SaveMetadata() {
   db_->current_transaction()->Put(LevelDbTargetGlobalKey::Key(), metadata_);
 }
 
-    nanopb::Message<firestore_client_Target> LevelDbTargetCache::DecodeTargetProto(nanopb::Reader* reader) {
-        auto message = Message<firestore_client_Target>::TryParse(reader);
-        if (!reader->ok()) {
-            HARD_FAIL("Target proto failed to parse: %s",
-                      reader->status().ToString());
-        }
+nanopb::Message<firestore_client_Target> LevelDbTargetCache::DecodeTargetProto(
+    nanopb::Reader* reader) {
+  auto message = Message<firestore_client_Target>::TryParse(reader);
+  if (!reader->ok()) {
+    HARD_FAIL("Target proto failed to parse: %s", reader->status().ToString());
+  }
 
-        return message;
-    }
+  return message;
+}
 
 TargetData LevelDbTargetCache::DecodeTarget(absl::string_view encoded) {
   StringReader reader{encoded};

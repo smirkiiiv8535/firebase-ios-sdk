@@ -373,12 +373,13 @@ TEST_P(LruGarbageCollectorTest, RemoveQueriesUpThroughSequenceNumber) {
   int removed = RemoveTargets(20 + initial_sequence_number_, live_queries);
   ASSERT_EQ(10, removed);
 
-  // Make sure we removed the even targets with target_id <= 20.
+  // Make sure we removed the even targets with the next 20 sequence numbers.
   persistence_->Run("verify remaining targets are > 20 or odd", [&] {
-    target_cache_->EnumerateTargets([&](const TargetData& target_data) {
-      ASSERT_TRUE(target_data.target_id() > 20 ||
-                  target_data.target_id() % 2 == 1);
-    });
+    target_cache_->EnumerateSequenceNumbers(
+        [&](ListenSequenceNumber sequence_number) {
+          ASSERT_TRUE(sequence_number > 20 + initial_sequence_number_ ||
+                      sequence_number % 2 == 1);
+        });
   });
 }
 

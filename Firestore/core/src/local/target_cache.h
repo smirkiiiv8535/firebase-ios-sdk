@@ -87,7 +87,8 @@ class TargetCache {
    */
   virtual absl::optional<TargetData> GetTarget(const core::Target& target) = 0;
 
-  virtual void EnumarateSequenceNumbers(const SequenceNumberCallback &callback) = 0;
+  virtual void EnumerateSequenceNumbers(
+      const SequenceNumberCallback& callback) = 0;
 
   virtual int RemoveTargets(
       model::ListenSequenceNumber upper_bound,
